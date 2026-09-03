@@ -2,7 +2,7 @@
 
 client_id = "00075fb2f47d14b55aed32ea74897ddb"
 name = "Video Testimonial Dev App"
-application_url = "https://example.com"
+application_url = "https://video-testimonial-web.onrender.com"
 embedded = true
 
 [access_scopes]
@@ -38,6 +38,7 @@ api_version = "2026-10"
 
   [[webhooks.subscriptions]]
   uri = "/webhooks/app/uninstalled"
+  compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
   topics = [ "app/uninstalled" ]
 
   [[webhooks.subscriptions]]
@@ -45,8 +46,12 @@ api_version = "2026-10"
   topics = [ "app/scopes_update" ]
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [ 
+  "https://video-testimonial-web.onrender.com/auth/callback",
+  "https://video-testimonial-web.onrender.com/auth/shopify/callback",
+  "https://video-testimonial-web.onrender.com/api/auth/callback"
+ ]
+
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
