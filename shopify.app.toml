@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "00075fb2f47d14b55aed32ea74897ddb"
+client_id = "9568e4cf2efca7a580d553034b7c82b0"
 name = "Video Testimonial Dev App"
 application_url = "https://video-testimonial-web.onrender.com"
 embedded = true
@@ -52,6 +52,6 @@ redirect_urls = [
   "https://video-testimonial-web.onrender.com/api/auth/callback"
  ]
 
-
 [build]
+include_config_on_deploy = true
 automatically_update_urls_on_dev = true
