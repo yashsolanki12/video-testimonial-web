@@ -3,7 +3,7 @@ import { Outlet, useLoaderData, useRouteError } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { AppProvider } from "@shopify/shopify-app-react-router/react";
 import { authenticate, sessionStorage } from "../shopify.server";
-import { authPostSync } from "../api/auth";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
@@ -43,41 +43,55 @@ export const loader = async ({ request }) => {
         console.error("[App] Failed to fetch shop info:", err.message);
       }
     }
+
+    const backendUrl = process.env.VITE_BACKEND_API_URL || "http://localhost:5000";
+    fetch(`${backendUrl}/api/auth/post-setup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ shop: session.shop }),
+    }).catch((err) => console.error("[App] Post-setup failed:", err.message));
   }
+
+  // eslint-disable-next-line no-undef
   return {
-    // eslint-disable-next-line no-undef
     apiKey: process.env.SHOPIFY_API_KEY || "",
     shop: session?.shop || "",
   };
 };
 
 export default function App() {
-  const { apiKey, shop } = useLoaderData();
+  const { apiKey } = useLoaderData();
 
-  React.useEffect(() => {
-    if (!shop) return;
-    const key = `auth_post_sync_${shop}`;
-    if (!localStorage.getItem(key)) {
-      authPostSync(shop)
-        .then(() => localStorage.setItem(key, "true"))
-        .catch((error) => console.error("[App] Auth post sync failed:", error));
-    }
-  }, [shop]);
+  const queryClient = React.useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 1000 * 60 * 5,
+            gcTime: 1000 * 60 * 10,
+            refetchOnWindowFocus: false,
+            enabled: typeof window !== "undefined",
+          },
+        },
+      }),
+    [],
+  );
 
   return (
-    <AppProvider embedded apiKey={apiKey}>
-      <s-app-nav>
-        <s-link href="/app">Home</s-link>
-        <s-link href="/app/testimonials">Testimonials</s-link>
-        <s-link href="/app/settings">Settings</s-link>
-        <s-link href="/app/storefront">Storefront Preview</s-link>
-      </s-app-nav>
-      <Outlet />
-    </AppProvider>
+    <QueryClientProvider client={queryClient}>
+      <AppProvider embedded apiKey={apiKey}>
+        <s-app-nav>
+          <s-link href="/app">Home</s-link>
+          <s-link href="/app/testimonials">Testimonials</s-link>
+          <s-link href="/app/settings">Settings</s-link>
+          <s-link href="/app/storefront">Storefront Preview</s-link>
+        </s-app-nav>
+        <Outlet />
+      </AppProvider>
+    </QueryClientProvider>
   );
 }
 
-// Shopify needs React Router to catch some thrown responses, so that their headers are included in the response.
 export function ErrorBoundary() {
   return boundary.error(useRouteError());
 }
