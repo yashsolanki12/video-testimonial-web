@@ -1,15 +1,29 @@
-import { authenticate } from "../shopify.server";
-import db from "../db.server";
+import { authenticate, sessionStorage } from "../shopify.server";
 
 export const action = async ({ request }) => {
   const { shop, session, topic } = await authenticate.webhook(request);
 
   console.log(`Received ${topic} webhook for ${shop}`);
 
-  // Webhook requests can trigger multiple times and after an app has already been uninstalled.
-  // If this webhook already ran, the session may have been deleted previously.
+  // Clean up backend data (testimonials + settings)
+  try {
+    const backendUrl = import.meta.env.BACKEND_API_URL || "http://localhost:5000";
+    await fetch(`${backendUrl}/api/webhooks/uninstall`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ shop }),
+    });
+    console.log(`Backend cleanup completed for ${shop}`);
+  } catch (error) {
+    console.error("Backend cleanup failed:", error);
+  }
+
+  // Delete all sessions for this shop
   if (session) {
-    await db.session.deleteMany({ where: { shop } });
+    const sessions = await sessionStorage.findSessionsByShop(shop);
+    for (const s of sessions) {
+      await sessionStorage.deleteSession(s.id);
+    }
   }
 
   return new Response();
