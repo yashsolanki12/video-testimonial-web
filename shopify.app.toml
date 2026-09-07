@@ -39,12 +39,7 @@ api_version = "2026-10"
   [[webhooks.subscriptions]]
   uri = "https://video-testimonial-backend.onrender.com/api/webhooks/webhook"
   compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
-  topics = [ "app/uninstalled" ]
-
-  [[webhooks.subscriptions]]
-  uri = "/webhooks/app/scopes_update"
-  topics = [ "app/scopes_update" ]
-
+  topics = [ "app/uninstalled", "app/scopes_update" ]
 
 [auth]
 redirect_urls = [ 
@@ -54,5 +49,4 @@ redirect_urls = [
  ]
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
