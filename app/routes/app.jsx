@@ -43,8 +43,10 @@ export const loader = async ({ request }) => {
         console.error("[App] Failed to fetch shop info:", err.message);
       }
     }
-
-    const backendUrl = process.env.VITE_BACKEND_API_URL || "http://localhost:5000";
+  
+    const backendUrl =
+      // eslint-disable-next-line no-undef
+      process.env.VITE_BACKEND_API_URL || "http://localhost:5000";
     fetch(`${backendUrl}/api/auth/post-setup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -52,8 +54,9 @@ export const loader = async ({ request }) => {
     }).catch((err) => console.error("[App] Post-setup failed:", err.message));
   }
 
-  // eslint-disable-next-line no-undef
+ 
   return {
+    // eslint-disable-next-line no-undef
     apiKey: process.env.SHOPIFY_API_KEY || "",
     shop: session?.shop || "",
   };
