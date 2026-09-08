@@ -1,8 +1,9 @@
-import { useSearchParams } from "react-router";
+import { useRouteLoaderData, useSearchParams } from "react-router";
 
 export const useCurrentShopDomain = () => {
   const [searchParams] = useSearchParams();
-  return searchParams.get("shop") || "";
+  const appData = useRouteLoaderData("routes/app");
+  return searchParams.get("shop") || appData?.shop || "";
 };
 
 export const extractVideoEmbedUrl = (url, type) => {

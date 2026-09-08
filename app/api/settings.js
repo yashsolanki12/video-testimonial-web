@@ -20,6 +20,26 @@ export const getSettings = async (shopDomain) => {
     });
 };
 
+// Create settings
+export const createSettings = async (data, shopDomain) => {
+  if (!shopDomain) {
+    throw new Error("Shop domain is required.");
+  }
+
+  return axiosInstance
+    .post("settings/add", data, {
+      headers: {
+        "x-shopify-shop-domain": shopDomain,
+      },
+    })
+    .then((res) => res.data)
+    .catch((error) => {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("API Error in create settings:", errorMessage);
+      throw new Error(errorMessage);
+    });
+};
+
 // Update settings
 export const updateSettings = async (data, shopDomain) => {
   if (!shopDomain) {
@@ -34,8 +54,29 @@ export const updateSettings = async (data, shopDomain) => {
     })
     .then((res) => res.data)
     .catch((error) => {
-      console.error("API Error in update settings:", error);
-      throw error;
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("API Error in update settings:", errorMessage);
+      throw new Error(errorMessage);
+    });
+};
+
+// Delete settings
+export const deleteSettings = async (id, shopDomain) => {
+  if (!shopDomain) {
+    throw new Error("Shop domain is required.");
+  }
+
+  return axiosInstance
+    .delete(`settings/${id}`, {
+      headers: {
+        "x-shopify-shop-domain": shopDomain,
+      },
+    })
+    .then((res) => res.data)
+    .catch((error) => {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("API Error in delete settings:", errorMessage);
+      throw new Error(errorMessage);
     });
 };
 
