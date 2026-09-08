@@ -1,6 +1,9 @@
+import React from "react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import TestimonialsPage from "./app.testimonials";
+import TestimonialShimmer from "../pages/testimonials/TestimonialShimmer";
+
+const TestimonialsPage = React.lazy(() => import("./app.testimonials._index"));
 
 export const loader = async ({ request }) => {
   await authenticate.admin(request);
@@ -8,7 +11,11 @@ export const loader = async ({ request }) => {
 };
 
 export default function Index() {
-  return <TestimonialsPage />;
+  return (
+    <React.Suspense fallback={<TestimonialShimmer />}>
+      <TestimonialsPage />
+    </React.Suspense>
+  );
 }
 
 export const headers = (headersArgs) => {

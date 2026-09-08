@@ -13,6 +13,7 @@ import {
   getAllTestimonials,
   deleteTestimonial,
   toggleTestimonialActive,
+  reorderTestimonials,
 } from "../api/testimonial";
 import { Notification } from "../components/common/Notification";
 import { useCurrentShopDomain } from "../utils/helper";
@@ -58,6 +59,12 @@ export default function TestimonialsIndexPage() {
     { invalidateKeys: [["testimonials"]] },
   );
 
+  const reorderMutation = useTestimonialSubmit(
+    (orderedIds) => reorderTestimonials(orderedIds, shopDomain),
+    setSnackBar,
+    { invalidateKeys: [["testimonials"]] },
+  );
+
   const testimonials = testimonialsResponse?.data || [];
 
   const handleDelete = () => {
@@ -70,6 +77,10 @@ export default function TestimonialsIndexPage() {
 
   const handleToggle = (id) => {
     toggleMutation.mutate(id);
+  };
+
+  const handleReorder = (orderedIds) => {
+    reorderMutation.mutate(orderedIds);
   };
 
   if (isLoading) {
@@ -150,6 +161,7 @@ export default function TestimonialsIndexPage() {
                 setIsDeleteDialogOpen(true);
               }}
               onToggle={handleToggle}
+              onReorder={handleReorder}
             />
           )}
         </CardContent>

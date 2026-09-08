@@ -96,7 +96,10 @@ const ShopifyMediaDialog = ({ open, onClose, onSelect }) => {
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={(e, reason) => {
+        if (reason === "backdropClick") return;
+        onClose();
+      }}
       maxWidth="md"
       fullWidth
       PaperProps={{
@@ -221,7 +224,7 @@ const ShopifyMediaDialog = ({ open, onClose, onSelect }) => {
 
             {!hasNextPageRef.current && videos.length > 0 && (
               <Box sx={{ textAlign: "center", py: 2 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="text.secondary" sx={{fontSize: 14}}>
                   No more videos.
                 </Typography>
               </Box>
