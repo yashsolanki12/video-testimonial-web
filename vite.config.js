@@ -51,6 +51,12 @@ export default defineConfig({
   plugins: [reactRouter(), tsconfigPaths()],
   build: {
     assetsInlineLimit: 0,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.message && warning.message.includes("dynamically imported") && warning.message.includes("statically imported")) return;
+        warn(warning);
+      },
+    },
   },
   optimizeDeps: {
     include: ["@shopify/app-bridge-react"],

@@ -1,26 +1,17 @@
-import { useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { StyledEngineProvider } from "@mui/material/styles";
 
 export default function App() {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            staleTime: 5 * 60 * 1000,
-            retry: 1,
-            refetchOnWindowFocus: false,
-          },
-        },
-      })
-  );
-
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <meta
+          name="emotion-insertion-point"
+          content=""
+          suppressHydrationWarning
+        />
         <link rel="preconnect" href="https://cdn.shopify.com/" />
         <link
           rel="stylesheet"
@@ -29,10 +20,10 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
-        <QueryClientProvider client={queryClient}>
+      <body suppressHydrationWarning>
+        <StyledEngineProvider injectFirst>
           <Outlet />
-        </QueryClientProvider>
+        </StyledEngineProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

@@ -1,3 +1,4 @@
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 
 export const useTestimonialData = (queryKey, queryFn, setSnackBar, options = {}) => {
@@ -14,29 +15,34 @@ export const useTestimonialData = (queryKey, queryFn, setSnackBar, options = {})
 
   const errorMessage = error?.message;
 
-  if (errorMessage && setSnackBar) {
-    setSnackBar((prev) => {
-      if (prev.message === errorMessage && prev.open) return prev;
-      return {
-        open: true,
-        message: errorMessage,
-        severity: "error",
-      };
-    });
-  }
-
-  if (isSuccess && setSnackBar && data?.message) {
-    setTimeout(() => {
+  React.useEffect(() => {
+    if (errorMessage && setSnackBar) {
       setSnackBar((prev) => {
-        if (prev.message === data.message && prev.open) return prev;
+        if (prev.message === errorMessage && prev.open) return prev;
         return {
           open: true,
-          message: data.message,
-          severity: "success",
+          message: errorMessage,
+          severity: "error",
         };
       });
-    }, 500);
-  }
+    }
+  }, [errorMessage, setSnackBar]);
+
+  React.useEffect(() => {
+    if (isSuccess && setSnackBar && data?.message) {
+      const timer = setTimeout(() => {
+        setSnackBar((prev) => {
+          if (prev.message === data.message && prev.open) return prev;
+          return {
+            open: true,
+            message: data.message,
+            severity: "success",
+          };
+        });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isSuccess, setSnackBar, data]);
 
   return { error, data, isLoading, refetch };
 };
