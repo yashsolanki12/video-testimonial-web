@@ -212,6 +212,10 @@ const SliderView = ({ testimonials, effect }) => {
 const VideoTestimonialSection = ({ testimonials, settings }) => {
   if (testimonials.length === 0) return null;
 
+  const sectionTitle = settings?.section_title || "Video Testimonials";
+  const displayLayout = settings?.display_layout || "slider";
+  const sliderEffect = settings?.slider_effect || "standard";
+
   return (
     <Box
       sx={{
@@ -227,15 +231,15 @@ const VideoTestimonialSection = ({ testimonials, settings }) => {
         sx={{ textAlign: "center", mb: 4 }}
         gutterBottom
       >
-        {settings.section_title}
+        {sectionTitle}
       </Typography>
 
-      {settings.display_layout === "grid" ? (
+      {displayLayout === "grid" ? (
         <GridView testimonials={testimonials} />
       ) : (
         <SliderView
           testimonials={testimonials}
-          effect={settings.slider_effect}
+          effect={sliderEffect}
         />
       )}
     </Box>

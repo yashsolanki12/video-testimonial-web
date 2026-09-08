@@ -67,15 +67,16 @@ export const createTestimonial = async (data, shopDomain) => {
   }
 
   return axiosInstance
-    .post("testimonials", data, {
+    .post("testimonials/add", data, {
       headers: {
         "x-shopify-shop-domain": shopDomain,
       },
     })
     .then((res) => res.data)
     .catch((error) => {
-      console.error("API Error in create testimonial:", error);
-      throw error;
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("API Error in create testimonial:", errorMessage);
+      throw new Error(errorMessage);
     });
 };
 
@@ -93,8 +94,9 @@ export const updateTestimonial = async ({ id, data, shopDomain }) => {
     })
     .then((res) => res.data)
     .catch((error) => {
-      console.error("API Error in update testimonial:", error);
-      throw error;
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("API Error in update testimonial:", errorMessage);
+      throw new Error(errorMessage);
     });
 };
 

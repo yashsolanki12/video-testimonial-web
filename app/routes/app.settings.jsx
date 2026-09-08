@@ -1,24 +1,29 @@
-import { useState, useEffect } from "react";
+import React from "react";
 import {
   Box,
+  Button,
   Card,
   CardContent,
-  CardHeader,
-  Divider,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  Radio,
-  RadioGroup,
-  TextField,
+  CircularProgress,
+  IconButton,
   Typography,
 } from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { authenticate } from "../shopify.server";
 import { useTestimonialData } from "../hooks/useTestimonialData";
 import { useTestimonialSubmit } from "../hooks/useTestimonialSubmit";
-import { getSettings, updateSettings } from "../api/settings";
-import { Notification, LoadingState } from "../components/common";
+import {
+  getSettings,
+  createSettings,
+  updateSettings,
+  deleteSettings,
+} from "../api/settings";
+import { Notification } from "../components/common/Notification";
+import ConfirmationDialog from "../components/confirmation-dialog";
 import { useCurrentShopDomain } from "../utils/helper";
+import SettingsForm from "../pages/settings/SettingsForm";
+import SettingsShimmer from "../pages/settings/SettingsShimmer";
 
 export const loader = async ({ request }) => {
   await authenticate.admin(request);
@@ -27,22 +32,29 @@ export const loader = async ({ request }) => {
 
 export default function SettingsPage() {
   const shopDomain = useCurrentShopDomain();
-  const [formData, setFormData] = useState({
-    section_title: "Video Testimonials",
-    slider_effect: "standard",
-    display_layout: "slider",
+  const [formData, setFormData] = React.useState({
+    section_title: "",
+    slider_effect: "",
+    display_layout: "",
   });
-  const [snackBar, setSnackBar] = useState({
+  const [snackBar, setSnackBar] = React.useState({
     open: false,
     message: "",
     severity: "success",
   });
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
   const { data: settingsResponse, isLoading } = useTestimonialData(
     ["settings"],
     getSettings,
-    setSnackBar,
+    null,
     { shopDomain },
+  );
+
+  const createMutation = useTestimonialSubmit(
+    (data) => createSettings(data, shopDomain),
+    setSnackBar,
+    { invalidateKeys: [["settings"]] },
   );
 
   const updateMutation = useTestimonialSubmit(
@@ -51,7 +63,23 @@ export default function SettingsPage() {
     { invalidateKeys: [["settings"]] },
   );
 
-  useEffect(() => {
+  const deleteMutation = useTestimonialSubmit(
+    (id) => deleteSettings(id, shopDomain),
+    setSnackBar,
+    {
+      invalidateKeys: [["settings"]],
+
+      onSuccess: () => {
+        setFormData({
+          section_title: "",
+          display_layout: "",
+          slider_effect: "",
+        });
+      },
+    },
+  );
+
+  React.useEffect(() => {
     if (settingsResponse?.data) {
       const settings = settingsResponse.data;
       setFormData({
@@ -62,179 +90,99 @@ export default function SettingsPage() {
     }
   }, [settingsResponse]);
 
+  const settingsExist = !!settingsResponse?.data;
+  const settingsId = settingsResponse?.data?.id;
+
   const handleSave = () => {
-    updateMutation.mutate(formData);
+    if (settingsExist) {
+      updateMutation.mutate(formData);
+    } else {
+      createMutation.mutate(formData);
+    }
+  };
+
+  const handleDelete = () => {
+    if (settingsId) {
+      deleteMutation.mutate(settingsId);
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   if (isLoading) {
-    return <LoadingState message="Loading settings..." />;
+    return <SettingsShimmer />;
   }
 
+  const isAnyPending =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    deleteMutation.isPending;
+
   return (
-    <Box sx={{ p: 4 }}>
-      <Box
+    <Box sx={{ px: 4, py: 2 }}>
+      <Box sx={{ mb: 1 }}>
+        <Typography
+          variant="h5"
+          component="h1"
+          sx={{ fontWeight: 600, color: "#202223" }}
+        >
+          Settings
+        </Typography>
+      </Box>
+      <Card
+        elevation={0}
         sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 4,
+          background: "#ffffff",
+          border: "1px solid #e1e3e5",
+          borderRadius: "12px",
         }}
       >
-        <Box>
-          <Typography variant="h4" component="h1" sx={{ fontWeight: 600 }}>
-            Settings
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Configure your video testimonial section
-          </Typography>
-        </Box>
-        <s-button
-          variant="primary"
+        <CardContent sx={{ p: 3 }}>
+          <SettingsForm formData={formData} onChange={setFormData} />
+        </CardContent>
+      </Card>
+
+      <Box sx={{ mt: 3, display: "flex", gap: 2, alignItems: "center" }}>
+        <Button
+          variant="contained"
+          startIcon={
+            createMutation.isPending || updateMutation.isPending ? (
+              <CircularProgress size={16} color="inherit" />
+            ) : (
+              <SaveIcon />
+            )
+          }
           onClick={handleSave}
-          loading={updateMutation.isPending}
+          disabled={isAnyPending}
+          sx={{ backgroundColor: "black", textTransform: "none" }}
         >
           Save Changes
-        </s-button>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-          maxWidth: 600,
-        }}
-      >
-        <Card variant="outlined">
-          <CardHeader
-            title="Section Configuration"
-            subheader="Customize the appearance of your testimonial section"
-          />
-          <Divider />
-          <CardContent>
-            <TextField
-              label="Section Title"
-              value={formData.section_title}
-              onChange={(e) =>
-                setFormData({ ...formData, section_title: e.target.value })
-              }
-              fullWidth
-              required
-              helperText="This title will be displayed above your testimonials"
-            />
-          </CardContent>
-        </Card>
-
-        <Card variant="outlined">
-          <CardHeader
-            title="Display Layout"
-            subheader="Choose how testimonials are displayed"
-          />
-          <Divider />
-          <CardContent>
-            <FormControl>
-              <FormLabel>Layout Type</FormLabel>
-              <RadioGroup
-                value={formData.display_layout}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    display_layout: e.target.value,
-                  })
-                }
-              >
-                <FormControlLabel
-                  value="slider"
-                  control={<Radio />}
-                  label="Slider"
-                />
-                <FormControlLabel
-                  value="grid"
-                  control={<Radio />}
-                  label="Grid (2 columns)"
-                />
-              </RadioGroup>
-            </FormControl>
-          </CardContent>
-        </Card>
-
-        {formData.display_layout === "slider" && (
-          <Card variant="outlined">
-            <CardHeader
-              title="Slider Effect"
-              subheader="Choose the transition effect for the slider"
-            />
-            <Divider />
-            <CardContent>
-              <FormControl>
-                <FormLabel>Transition Effect</FormLabel>
-                <RadioGroup
-                  value={formData.slider_effect}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      slider_effect: e.target.value,
-                    })
-                  }
-                >
-                  <FormControlLabel
-                    value="standard"
-                    control={<Radio />}
-                    label="Standard Slide"
-                  />
-                  <FormControlLabel
-                    value="fade"
-                    control={<Radio />}
-                    label="Fade Transition"
-                  />
-                  <FormControlLabel
-                    value="carousel"
-                    control={<Radio />}
-                    label="Carousel / Continuous Slide"
-                  />
-                </RadioGroup>
-              </FormControl>
-            </CardContent>
-          </Card>
+        </Button>
+        {settingsExist && (
+          <IconButton
+            color="error"
+            onClick={() => setIsDeleteDialogOpen(true)}
+            disabled={isAnyPending}
+            sx={{
+              "&:hover": { bgcolor: "error.50" },
+            }}
+          >
+            {deleteMutation.isPending ? (
+              <CircularProgress size={18} color="inherit" />
+            ) : (
+              <DeleteIcon />
+            )}
+          </IconButton>
         )}
-
-        <Card variant="outlined">
-          <CardHeader
-            title="Preview"
-            subheader="See how your settings will look"
-          />
-          <Divider />
-          <CardContent>
-            <Box
-              sx={{
-                p: 3,
-                border: "1px dashed",
-                borderColor: "divider",
-                borderRadius: 1,
-                textAlign: "center",
-              }}
-            >
-              <Typography variant="h5" gutterBottom>
-                {formData.section_title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Layout:{" "}
-                {formData.display_layout === "grid"
-                  ? "2-Column Grid"
-                  : "Slider"}
-                {formData.display_layout === "slider" &&
-                  ` | Effect: ${
-                    formData.slider_effect === "standard"
-                      ? "Standard Slide"
-                      : formData.slider_effect === "fade"
-                      ? "Fade Transition"
-                      : "Carousel"
-                  }`}
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
       </Box>
+
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        title="Delete Settings"
+        message="Are you sure you want to delete all settings? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      />
 
       <Notification
         open={snackBar.open}

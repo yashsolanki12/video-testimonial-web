@@ -84,10 +84,8 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <AppProvider embedded apiKey={apiKey}>
         <s-app-nav>
-          <s-link href="/app">Home</s-link>
           <s-link href="/app/testimonials">Testimonials</s-link>
           <s-link href="/app/settings">Settings</s-link>
-          <s-link href="/app/storefront">Storefront Preview</s-link>
         </s-app-nav>
         <Outlet />
       </AppProvider>
