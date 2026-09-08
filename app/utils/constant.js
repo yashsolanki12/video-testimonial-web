@@ -7,5 +7,4 @@ export const VIDEO_TYPES = [
 export const INITIAL_FORM_DATA = {
   title: "",
   video_url: "",
-  video_type: "youtube",
 };

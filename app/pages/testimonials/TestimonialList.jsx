@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Box,
   Card,
@@ -12,24 +13,24 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { extractVideoEmbedUrl } from "../../utils/helper";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import {
+  getVideoThumbnail,
+  isShopifyVideo,
+  formatDate,
+} from "../../utils/helper";
 
-const VIDEO_TYPE_COLORS = {
-  youtube: "error",
-  vimeo: "info",
-  shopify: "success",
-};
-
-const TestimonialCard = ({
-  testimonial,
-  onEdit,
-  onDelete,
-  onToggle,
-}) => {
-  const embedUrl = extractVideoEmbedUrl(
+const TestimonialCard = ({ testimonial, onEdit, onDelete, onToggle }) => {
+  const [imgError, setImgError] = useState(false);
+  const thumbnail = getVideoThumbnail(
     testimonial.video_url,
     testimonial.video_type,
   );
+  const isShopify = isShopifyVideo(testimonial.video_url);
+
+  const handlePreview = () => {
+    window.open(testimonial.video_url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <Card
@@ -38,10 +39,10 @@ const TestimonialCard = ({
         background: "#ffffff",
         border: "1px solid #e1e3e5",
         borderRadius: "12px",
-        transition: "box-shadow 0.2s ease, border-color 0.2s ease",
+        transition: "all 0.2s ease",
         "&:hover": {
-          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          borderColor: "#008060",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+          borderColor: "#c9cccf",
         },
       }}
     >
@@ -49,80 +50,161 @@ const TestimonialCard = ({
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 2,
+          gap: 2.5,
           p: 2,
           "&:last-child": { pb: 2 },
         }}
       >
         <Box
+          className="thumbnail-wrapper"
+          onClick={handlePreview}
           sx={{
-            width: 180,
-            height: 101,
+            width: 192,
+            height: 108,
             borderRadius: "8px",
             overflow: "hidden",
             flexShrink: 0,
-            bgcolor: "#f4f6f8",
+            bgcolor: "#1a1a1a",
+            position: "relative",
+            cursor: "pointer",
+            "&:hover .play-overlay": {
+              opacity: 1,
+            },
           }}
         >
-          <iframe
-            src={embedUrl}
-            title={testimonial.title}
-            style={{
-              width: "100%",
-              height: "100%",
-              border: "none",
+          {isShopify ? (
+            <Box
+              component="video"
+              src={testimonial.video_url}
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+              muted
+              preload="metadata"
+            />
+          ) : thumbnail && !imgError ? (
+            <Box
+              component="img"
+              src={thumbnail}
+              alt={testimonial.title}
+              onError={() => setImgError(true)}
+              sx={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+              }}
+            />
+          ) : (
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "#2a2a2a",
+              }}
+            >
+              <OpenInNewIcon sx={{ fontSize: 32, color: "#666" }} />
+            </Box>
+          )}
+          <Box
+            className="play-overlay"
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "rgba(0,0,0,0.35)",
+              opacity: 0,
+              transition: "opacity 0.2s ease",
             }}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          >
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: "50%",
+                bgcolor: "rgba(255,255,255,0.95)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+              }}
+            >
+              <OpenInNewIcon sx={{ fontSize: 22, color: "#1a1a1a" }} />
+            </Box>
+          </Box>
         </Box>
 
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 600, color: "#202223", mb: 0.5 }}
+            sx={{
+              fontWeight: 600,
+              color: "#202223",
+              mb: 0.5,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
           >
             {testimonial.title}
           </Typography>
-          <Stack direction="row" spacing={1}>
-            <Chip
-              label={testimonial.video_type.toUpperCase()}
-              size="small"
-              color={VIDEO_TYPE_COLORS[testimonial.video_type] || "default"}
-              variant="outlined"
-              sx={{ fontWeight: 500 }}
-            />
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            sx={{ mb: 0.5 }}
+          >
             <Chip
               label={testimonial.is_active ? "Active" : "Inactive"}
               size="small"
               color={testimonial.is_active ? "success" : "default"}
+              sx={{ fontWeight: 500, height: 22 }}
             />
           </Stack>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: "block" }}
+          >
+            Created: {formatDate(testimonial.created_at)}
+          </Typography>
         </Box>
 
         <Stack direction="row" spacing={0.5}>
-          <Tooltip title="Edit">
+          <Tooltip title="Edit" placement="top">
             <IconButton
               size="small"
-              color="primary"
               onClick={() => onEdit(testimonial)}
               sx={{
-                "&:hover": { bgcolor: "primary.50" },
+                color: "#6d7175",
+                "&:hover": { bgcolor: "#eef4fc", color: "#2c5aa0" },
               }}
             >
               <EditIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title={testimonial.is_active ? "Deactivate" : "Activate"}>
+          <Tooltip
+            title={testimonial.is_active ? "Deactivate" : "Activate"}
+            placement="top"
+          >
             <IconButton
               size="small"
-              color={testimonial.is_active ? "warning" : "success"}
               onClick={() => onToggle(testimonial.id)}
               sx={{
+                color: testimonial.is_active ? "#008060" : "#6d7175",
                 "&:hover": {
-                  bgcolor: testimonial.is_active
-                    ? "warning.50"
-                    : "success.50",
+                  bgcolor: testimonial.is_active ? "#e6f4f1" : "#f4f6f8",
                 },
               }}
             >
@@ -133,13 +215,13 @@ const TestimonialCard = ({
               )}
             </IconButton>
           </Tooltip>
-          <Tooltip title="Delete">
+          <Tooltip title="Delete" placement="top">
             <IconButton
               size="small"
-              color="error"
               onClick={() => onDelete(testimonial)}
               sx={{
-                "&:hover": { bgcolor: "error.50" },
+                color: "#6d7175",
+                "&:hover": { bgcolor: "#fef4f4", color: "#d72c0d" },
               }}
             >
               <DeleteIcon fontSize="small" />
@@ -153,7 +235,7 @@ const TestimonialCard = ({
 
 const TestimonialList = ({ testimonials, onEdit, onDelete, onToggle }) => {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {testimonials.map((testimonial) => (
         <TestimonialCard
           key={testimonial.id}

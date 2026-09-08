@@ -48,7 +48,8 @@ const SettingsForm = ({ formData, onChange }) => {
             onChange={handleChange("section_title")}
             fullWidth
             required
-            helperText="This title will be displayed above your testimonials"
+            helperText={`${(formData.section_title ?? "").length}/50 characters`}
+            slotProps={{ htmlInput: { maxLength: 50 } }}
           />
         </CardContent>
       </Card>

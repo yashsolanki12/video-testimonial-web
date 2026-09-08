@@ -118,7 +118,7 @@ export default function SettingsPage() {
     deleteMutation.isPending;
 
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ px: 4, py: 2 }}>
       <Box sx={{ mb: 1 }}>
         <Typography
           variant="h5"

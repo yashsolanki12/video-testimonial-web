@@ -9,7 +9,7 @@ const SettingsCardSkeleton = () => (
       borderRadius: "12px",
     }}
   >
-    <CardContent sx={{ p: 3 }}>
+    <CardContent sx={{ p: 2 }}>
       <Skeleton variant="text" width="40%" height={24} />
       <Skeleton variant="text" width="60%" height={20} sx={{ mb: 2 }} />
       <Skeleton variant="rounded" width="100%" height={56} sx={{ borderRadius: 1 }} />
@@ -19,6 +19,8 @@ const SettingsCardSkeleton = () => (
 
 const SettingsShimmer = () => (
   <Box sx={{ p: 4 }}>
+    <Skeleton variant="text" width={120} height={32} sx={{ mb: 1 }} />
+
     <Card
       elevation={0}
       sx={{
@@ -28,10 +30,6 @@ const SettingsShimmer = () => (
       }}
     >
       <CardContent sx={{ p: 3 }}>
-        <Box sx={{ mb: 3 }}>
-          <Skeleton variant="text" width={180} height={32} />
-          <Skeleton variant="text" width={280} height={20} sx={{ mt: 0.5 }} />
-        </Box>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
           <SettingsCardSkeleton />
           <SettingsCardSkeleton />
@@ -39,7 +37,11 @@ const SettingsShimmer = () => (
         </Box>
       </CardContent>
     </Card>
-    <Skeleton variant="rounded" width={140} height={36} sx={{ mt: 3, borderRadius: 1 }} />
+
+    <Box sx={{ mt: 3, display: "flex", gap: 2, alignItems: "center" }}>
+      <Skeleton variant="rounded" width={140} height={36} sx={{ borderRadius: 1 }} />
+      <Skeleton variant="circular" width={36} height={36} />
+    </Box>
   </Box>
 );
 
