@@ -1,0 +1,15 @@
+{% if block.settings.enabled %}
+<span>
+    HELLO APP
+</span>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Video Testimonial App",
+  "target": "body",
+  "settings": [
+    { "type": "checkbox", "id": "enabled", "label": "Enable Video Testimonial App", "default": true },
+  ]
+}
+{% endschema %}

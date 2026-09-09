@@ -1,0 +1,16 @@
+{% if block.settings.enabled %}
+<span>
+    HELLO THEME
+</span>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Video Testimonial Theme",
+  "target": "section",
+  "settings": [
+    { "type": "checkbox", "id": "enabled", "label": "Enable Video Testimonial Theme Block", "default": true },
+   
+  ]
+}
+{% endschema %}

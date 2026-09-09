@@ -9,13 +9,17 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import {
+  getVideoThumbnail,
+  isShopifyVideo,
+  formatDate,
+} from "../../utils/helper";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import { getVideoThumbnail, isShopifyVideo, formatDate } from "../../utils/helper";
 
 const TestimonialCard = ({
   testimonial,
@@ -265,7 +269,13 @@ const TestimonialCard = ({
   );
 };
 
-const TestimonialList = ({ testimonials, onEdit, onDelete, onToggle, onReorder }) => {
+const TestimonialList = ({
+  testimonials,
+  onEdit,
+  onDelete,
+  onToggle,
+  onReorder,
+}) => {
   const [draggedId, setDraggedId] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
 
