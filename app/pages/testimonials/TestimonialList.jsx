@@ -33,10 +33,7 @@ const TestimonialCard = ({
   isDragging,
 }) => {
   const [imgError, setImgError] = useState(false);
-  const thumbnail = getVideoThumbnail(
-    testimonial.video_url,
-    testimonial.video_type,
-  );
+  const thumbnail = getVideoThumbnail(testimonial.video_url);
   const isShopify = isShopifyVideo(testimonial.video_url);
 
   const handlePreview = () => {

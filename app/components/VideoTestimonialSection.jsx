@@ -5,10 +5,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { extractVideoEmbedUrl } from "../utils/helper";
 
 const VideoCard = ({ testimonial }) => {
-  const embedUrl = extractVideoEmbedUrl(
-    testimonial.video_url,
-    testimonial.video_type,
-  );
+  const embedUrl = extractVideoEmbedUrl(testimonial.video_url);
 
   return (
     <Card

@@ -6,15 +6,25 @@ export const useCurrentShopDomain = () => {
   return searchParams.get("shop") || appData?.shop || "";
 };
 
-export const extractVideoEmbedUrl = (url, type) => {
-  if (type === "youtube") {
+export const detectVideoType = (url) => {
+  if (!url) return "other";
+  if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube";
+  if (url.includes("vimeo.com")) return "vimeo";
+  if (url.includes("cdn.shopify.com/videos")) return "shopify";
+  return "other";
+};
+
+export const extractVideoEmbedUrl = (url) => {
+  const videoType = detectVideoType(url);
+
+  if (videoType === "youtube") {
     const match = url.match(
       /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([^&?#]+)/
     );
     return match ? `https://www.youtube.com/embed/${match[1]}` : url;
   }
 
-  if (type === "vimeo") {
+  if (videoType === "vimeo") {
     const match = url.match(/vimeo\.com\/(\d+)/);
     return match ? `https://player.vimeo.com/video/${match[1]}` : url;
   }
@@ -22,8 +32,10 @@ export const extractVideoEmbedUrl = (url, type) => {
   return url;
 };
 
-export const getVideoThumbnail = (url, type) => {
-  if (type === "youtube") {
+export const getVideoThumbnail = (url) => {
+  const videoType = detectVideoType(url);
+
+  if (videoType === "youtube") {
     const match = url.match(
       /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([^&?#]+)/
     );
@@ -32,11 +44,9 @@ export const getVideoThumbnail = (url, type) => {
       : null;
   }
 
-  if (type === "vimeo") {
+  if (videoType === "vimeo") {
     const match = url.match(/vimeo\.com\/(\d+)/);
-    return match
-      ? `https://vumbnail.com/${match[1]}.jpg`
-      : null;
+    return match ? `https://vumbnail.com/${match[1]}.jpg` : null;
   }
 
   return null;

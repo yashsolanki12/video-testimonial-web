@@ -248,7 +248,7 @@ export default function TestimonialsIndexPage() {
         p: { xs: 2, sm: 3, md: 4 },
         display: "flex",
         flexDirection: "column",
-        height: `${appEmbedEnabled ? "!calc(100vh - 110px)" : ""}`,
+        height: `${appEmbedEnabled ? "calc(100vh - 110px)" : ""}`,
       }}
     >
       {!appEmbedEnabled && (
