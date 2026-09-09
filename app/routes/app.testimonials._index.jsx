@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React from "react";
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import { authenticate } from "../shopify.server";
 import { useTestimonialData } from "../hooks/useTestimonialData";
@@ -105,7 +105,6 @@ export const loader = async ({ request }) => {
       simulation.logs.push(
         `Total blocks in settings: ${Object.keys(rawBlocks).length}`,
       );
-      console.log("raw block::", rawBlocks);
 
       const videoTestimonialBlocks = Object.keys(rawBlocks)
         .filter((key) => {
@@ -170,9 +169,9 @@ export default function TestimonialsIndexPage() {
   const shopDomain = useCurrentShopDomain();
 
   const navigate = useNavigate();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedTestimonial, setSelectedTestimonial] = useState(null);
-  const [snackBar, setSnackBar] = useState({
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [selectedTestimonial, setSelectedTestimonial] = React.useState(null);
+  const [snackBar, setSnackBar] = React.useState({
     open: false,
     message: "",
     severity: "success",
@@ -241,14 +240,15 @@ export default function TestimonialsIndexPage() {
   if (isLoading) {
     return <TestimonialShimmer count={4} />;
   }
-
+  const isAppEmbedCheck =
+    !appEmbedEnabled && testimonialsResponse?.data.length === 0;
   return (
     <Box
       sx={{
         p: { xs: 2, sm: 3, md: 4 },
         display: "flex",
         flexDirection: "column",
-        height: `${appEmbedEnabled ? "calc(100vh - 110px)" : ""}`,
+        height: isAppEmbedCheck ? "calc(100vh - 110px)" : "calc(100vh - 190px)",
       }}
     >
       {!appEmbedEnabled && (

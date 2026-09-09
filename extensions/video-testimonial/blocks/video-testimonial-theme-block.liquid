@@ -1,16 +1,272 @@
-{% if block.settings.enabled %}
-<span>
-    HELLO THEME
-</span>
-{% endif %}
+<div id="video-testimonial-section-{{ block.id }}" class="vt-section" style="display:none;">
+  <div class="vt-container">
+    <h2 class="vt-title" id="vt-title-{{ block.id }}"></h2>
+    <div class="vt-content" id="vt-content-{{ block.id }}"></div>
+  </div>
+</div>
+
+<div id="vt-fallback-{{ block.id }}" class="vt-fallback" style="display:none;">
+  <div class="vt-fallback-inner">
+    <p>Video Testimonial app is not activated. Please enable the app embed in Theme &gt; App embeds.</p>
+  </div>
+</div>
+
+<style>
+  .vt-section { width: 100%; padding: 40px 0; }
+  .vt-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+  .vt-title { text-align: center; font-size: 24px; font-weight: 700; margin-bottom: 10px; color: #202223; }
+  .vt-fallback { padding: 20px; text-align: center; }
+  .vt-fallback-inner { background: #f4f6f8; border: 1px dashed #8c9196; border-radius: 8px; padding: 24px; color: #6d7175; font-size: 14px; }
+
+  .vt-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  @media (max-width: 1200px) { .vt-grid { grid-template-columns: 1fr; } } {/* 749px */}
+
+  .vt-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
+  .vt-card-media { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; }
+  .vt-card-media iframe,
+  .vt-card-media video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+  .vt-card-body { padding: 16px; }
+  .vt-card-info { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+  .vt-card-label { font-size: 14px; font-weight: 600; color: #202223; }
+  .vt-card-value { font-size: 14px; color: #6d7175; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .vt-card-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: #2c5aa0; text-decoration: none; transition: color 0.2s; }
+  .vt-card-link:hover { color: #1a3d6d; text-decoration: underline; }
+
+  .vt-slider { position: relative; width: 100%; }
+  .vt-slider-viewport { overflow: hidden; border-radius: 8px; position: relative; }
+  .vt-slider-track { display: flex; transition: transform 0.5s ease-in-out; }
+  .vt-slider-track .vt-slide { min-width: 100%; flex-shrink: 0; }
+  .vt-slider-track.vt-fade-mode .vt-slide { position: absolute; top: 0; left: 0; width: 100%; opacity: 0; transition: opacity 0.5s ease-in-out; pointer-events: none; }
+  .vt-slider-track.vt-fade-mode .vt-slide.vt-active { opacity: 1; position: relative; pointer-events: auto; }
+
+  .vt-nav-btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.95); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.2); font-size: 20px; color: #202223; transition: all 0.2s ease; }
+  .vt-nav-btn:hover { background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.25); transform: translate(-50%, -50%) scale(1.05); }
+  .vt-nav-prev { left: 16px; transform: translate(0, -50%); }
+  .vt-nav-next { right: 16px; left: auto; transform: translate(0, -50%); }
+  .vt-nav-prev:hover { transform: translate(0, -50%) scale(1.05); }
+  .vt-nav-next:hover { transform: translate(0, -50%) scale(1.05); }
+  @media (max-width: 749px) { .vt-nav-btn { width: 36px; height: 36px; font-size: 16px; } .vt-nav-prev { left: 8px; } .vt-nav-next { right: 8px; } }
+
+  .vt-dots { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
+  .vt-dot { width: 10px; height: 10px; border-radius: 50%; background: #d4d4d4; cursor: pointer; border: none; transition: background 0.3s; }
+  .vt-dot.vt-active { background: #202223; }
+</style>
+
+<script>
+(function() {
+  const blockId = '{{ block.id }}';
+  const shopDomain = '{{ shop.permanent_domain }}';
+  const apiBase = 'https://video-testimonial-backend.onrender.com/api';
+
+  const sectionEl = document.getElementById('video-testimonial-section-' + blockId);
+  const fallbackEl = document.getElementById('vt-fallback-' + blockId);
+  const titleEl = document.getElementById('vt-title-' + blockId);
+  const contentEl = document.getElementById('vt-content-' + blockId);
+
+  function isAppEmbedEnabled() {
+    return window.__videoTestimonialAppEnabled === true ||
+           document.body.getAttribute('data-video-testimonial-enabled') === 'true';
+  }
+
+  function init() {
+    if (isAppEmbedEnabled()) {
+      loadTestimonials();
+    } else {
+      showFallback();
+    }
+  }
+
+  function showFallback() {
+    if (fallbackEl) fallbackEl.style.display = 'block';
+  }
+
+  function loadTestimonials() {
+    Promise.all([
+      fetch(apiBase + '/testimonials/active', { headers: { 'x-shopify-shop-domain': shopDomain } }).then(function(r) { return r.json(); }),
+      fetch(apiBase + '/settings/public', { headers: { 'x-shopify-shop-domain': shopDomain } }).then(function(r) { return r.json(); })
+    ]).then(function(results) {
+      const testimonials = (results[0] && results[0].data) || [];
+      const settings = (results[1] && results[1].data) || {};
+      if (testimonials.length > 0) {
+        render(testimonials, settings);
+      }
+    }).catch(function() {
+      showFallback();
+    });
+  }
+
+  function getVideoEmbedUrl(url) {
+    if (!url) return '';
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([^&?#]+)/);
+      return m ? 'https://www.youtube.com/embed/' + m[1] : url;
+    }
+    if (url.includes('vimeo.com')) {
+      const m = url.match(/vimeo\.com\/(\d+)/);
+      return m ? 'https://player.vimeo.com/video/' + m[1] : url;
+    }
+    return url;
+  }
+
+  function isShopifyVideo(url) {
+    return url && url.indexOf('cdn.shopify.com/videos') !== -1;
+  }
+
+  function createVideoCard(testimonial) {
+    const card = document.createElement('div');
+    card.className = 'vt-card';
+    const embedUrl = getVideoEmbedUrl(testimonial.video_url);
+    let mediaHtml = '';
+    if (isShopifyVideo(testimonial.video_url)) {
+      mediaHtml = '<video src="' + testimonial.video_url + '" muted preload="metadata" playsinline></video>';
+    } else {
+      mediaHtml = '<iframe src="' + embedUrl + '" title="' + (testimonial.title || '') + '" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+    }
+    card.innerHTML = '<div class="vt-card-media">' + mediaHtml + '</div>' +
+      '<div class="vt-card-body">' +
+        '<div class="vt-card-info">' +
+          '<span class="vt-card-label">Title:</span>' +
+          '<span class="vt-card-value">' + (testimonial.title || '') + '</span>' +
+        '</div>' +
+        '<a class="vt-card-link" href="' + testimonial.video_url + '" target="_blank" rel="noopener noreferrer">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>' +
+            '<polyline points="15 3 21 3 21 9"/>' +
+            '<line x1="10" y1="14" x2="21" y2="3"/>' +
+          '</svg>' +
+          '<span>Watch Video</span>' +
+        '</a>' +
+      '</div>';
+    return card;
+  }
+
+  function renderSlider(testimonials, effect) {
+    const slider = document.createElement('div');
+    slider.className = 'vt-slider';
+    const viewport = document.createElement('div');
+    viewport.className = 'vt-slider-viewport';
+    const track = document.createElement('div');
+    track.className = 'vt-slider-track';
+    if (effect === 'fade') track.classList.add('vt-fade-mode');
+
+    const dotsContainer = document.createElement('div');
+    dotsContainer.className = 'vt-dots';
+
+    let currentIndex = 0;
+    const slides = [];
+
+    testimonials.forEach(function(t, i) {
+      const slide = document.createElement('div');
+      slide.className = 'vt-slide' + (effect === 'fade' && i === 0 ? ' vt-active' : '');
+      slide.appendChild(createVideoCard(t));
+      track.appendChild(slide);
+      slides.push(slide);
+
+      const dot = document.createElement('button');
+      dot.className = 'vt-dot' + (i === 0 ? ' vt-active' : '');
+      dot.setAttribute('aria-label', 'Slide ' + (i + 1));
+      dot.addEventListener('click', function() { goTo(i); });
+      dotsContainer.appendChild(dot);
+    });
+
+    viewport.appendChild(track);
+    slider.appendChild(viewport);
+
+    function goTo(index) {
+      if (index < 0) index = testimonials.length - 1;
+      if (index >= testimonials.length) index = 0;
+      currentIndex = index;
+
+      if (effect === 'fade') {
+        slides.forEach(function(s, i) {
+          s.classList.toggle('vt-active', i === currentIndex);
+        });
+      } else {
+        track.style.transform = 'translateX(-' + (currentIndex * 100) + '%)';
+      }
+
+      const dots = dotsContainer.querySelectorAll('.vt-dot');
+      dots.forEach(function(d, i) {
+        d.classList.toggle('vt-active', i === currentIndex);
+      });
+    }
+
+    if (testimonials.length > 1) {
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'vt-nav-btn vt-nav-prev';
+      prevBtn.innerHTML = '&#10094;';
+      prevBtn.setAttribute('aria-label', 'Previous');
+      prevBtn.addEventListener('click', function() { goTo(currentIndex - 1); });
+
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'vt-nav-btn vt-nav-next';
+      nextBtn.innerHTML = '&#10095;';
+      nextBtn.setAttribute('aria-label', 'Next');
+      nextBtn.addEventListener('click', function() { goTo(currentIndex + 1); });
+
+      slider.appendChild(prevBtn);
+      slider.appendChild(nextBtn);
+      slider.appendChild(dotsContainer);
+    }
+
+    if (effect === 'carousel' && testimonials.length > 1) {
+      setInterval(function() { goTo(currentIndex + 1); }, 5000);
+    }
+
+    return slider;
+  }
+
+  function renderGrid(testimonials) {
+    const grid = document.createElement('div');
+    grid.className = 'vt-grid';
+    testimonials.forEach(function(t) {
+      grid.appendChild(createVideoCard(t));
+    });
+    return grid;
+  }
+
+  function render(testimonials, settings) {
+    const title = (settings && settings.section_title) || 'Video Testimonials';
+    const layout = (settings && settings.display_layout) || 'slider';
+    const effect = (settings && settings.slider_effect) || 'standard';
+
+    titleEl.textContent = title;
+
+    if (layout === 'grid') {
+      contentEl.appendChild(renderGrid(testimonials));
+    } else {
+      contentEl.appendChild(renderSlider(testimonials, effect));
+    }
+
+    sectionEl.style.display = 'block';
+  }
+
+  let attempts = 0;
+  const maxAttempts = 30;
+  const interval = setInterval(function() {
+    attempts++;
+    if (isAppEmbedEnabled()) {
+      clearInterval(interval);
+      init();
+    } else if (attempts >= maxAttempts) {
+      clearInterval(interval);
+      init();
+    }
+  }, 100);
+})();
+</script>
 
 {% schema %}
 {
-  "name": "Video Testimonial Theme",
+  "name": "Video Testimonial Section",
   "target": "section",
   "settings": [
-    { "type": "checkbox", "id": "enabled", "label": "Enable Video Testimonial Theme Block", "default": true },
-   
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable Video Testimonial",
+      "default": true
+    }
   ]
 }
 {% endschema %}
