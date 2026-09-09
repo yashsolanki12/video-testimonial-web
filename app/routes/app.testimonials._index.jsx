@@ -248,7 +248,7 @@ export default function TestimonialsIndexPage() {
         p: { xs: 2, sm: 3, md: 4 },
         display: "flex",
         flexDirection: "column",
-        height: `${!appEmbedEnabled ? "" : "calc(100vh - 110px)"}`,
+        height: `${appEmbedEnabled ? "!calc(100vh - 110px)" : ""}`,
       }}
     >
       {!appEmbedEnabled && (
@@ -291,15 +291,19 @@ export default function TestimonialsIndexPage() {
               }}
             >
               <span style={{ fontSize: "14px" }}>
-                Please activate the app by clicking{" "}
+                Please activate app embed by clicking{" "}
               </span>
               <Box
                 component="span"
-                sx={{ fontWeight: 700, color: "black", fontSize: "14px" }}
+                sx={{
+                  fontWeight: 700,
+                  color: "black",
+                  fontSize: "14px",
+                  mr: 0.6,
+                }}
               >
-                Activate
+                Activate.
               </Box>
-              button.
             </Typography>
 
             {/* Action Button */}
