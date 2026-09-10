@@ -19,13 +19,14 @@ import {
   updateTestimonial,
 } from "../../api/testimonial";
 import { Notification } from "../../components/common/Notification";
-import { useCurrentShopDomain } from "../../utils/helper";
+import { useCurrentShopDomain, detectVideoType } from "../../utils/helper";
 import { useNavigate, useParams } from "react-router";
 import ShopifyMediaDialog from "../../components/ShopifyMediaDialog";
 
 const INITIAL_FORM_DATA = {
   title: "",
   video_url: "",
+  video_type: "other",
 };
 
 const TestimonialFormPage = () => {
@@ -65,19 +66,30 @@ const TestimonialFormPage = () => {
 
   useEffect(() => {
     if (testimonialResponse?.data) {
+      const url = testimonialResponse.data.video_url;
       setFormData({
         title: testimonialResponse.data.title,
-        video_url: testimonialResponse.data.video_url,
+        video_url: url,
+        video_type: detectVideoType(url),
       });
     }
   }, [testimonialResponse]);
 
   const handleChange = (field) => (e) => {
-    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+    const value = e.target.value;
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === "video_url" ? { video_type: detectVideoType(value) } : {}),
+    }));
   };
 
   const handleMediaSelect = (url) => {
-    setFormData((prev) => ({ ...prev, video_url: url }));
+    setFormData((prev) => ({
+      ...prev,
+      video_url: url,
+      video_type: detectVideoType(url),
+    }));
   };
 
   const handleSubmit = () => {

@@ -14,6 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useCurrentShopDomain } from "../utils/helper";
 import { getShopifyVideos } from "../api/files";
+import EmptyState from "./common/EmptyState";
 
 const ShopifyMediaDialog = ({ open, onClose, onSelect }) => {
   const shopDomain = useCurrentShopDomain();
@@ -144,16 +145,7 @@ const ShopifyMediaDialog = ({ open, onClose, onSelect }) => {
             <CircularProgress size={32} />
           </Box>
         ) : videos.length === 0 ? (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "60vh",
-            }}
-          >
-            <Typography color="text.secondary">No videos found</Typography>
-          </Box>
+          <EmptyState />
         ) : (
           <Box sx={{ p: 2 }}>
             <Box

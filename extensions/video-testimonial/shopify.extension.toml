@@ -1,3 +1,14 @@
 name = "video-testimonial"
 type = "theme"
 uid = "0ea98bf3-e1af-bda6-445c-8e0e979cfb2758f7553f"
+
+[blocks]
+	[blocks.app-embed]
+	name = "Video Testimonial App"
+	target = "body"
+	file = "blocks/video_testimonial_app.liquid"
+
+	[blocks.video-testimonial-theme-block]
+	name = "Video Testimonial Section"
+	target = "section"
+	file = "blocks/video-testimonial-theme-block.liquid"

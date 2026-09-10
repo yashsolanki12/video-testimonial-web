@@ -10,6 +10,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import SettingsPreview from "../../components/SettingsPreview";
 
 const SettingsForm = ({ formData, onChange }) => {
   const handleChange = (field) => (e) => {
@@ -152,41 +153,30 @@ const SettingsForm = ({ formData, onChange }) => {
           borderRadius: "12px",
         }}
       >
-        <CardContent sx={{ p: 2 }}>
+        <CardContent sx={{ p: 1.5 }}>
           <Typography
             variant="subtitle1"
-            sx={{ fontWeight: 600, mb: 0.5, color: "#202223" }}
+            sx={{ fontWeight: 600, mb: 0.25, color: "#202223", fontSize: 20 }}
           >
-            Slider Effect
+            Preview
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontSize: 14 }}>
             See how your settings will look
           </Typography>
           <Box
             sx={{
-              p: 3,
+              p: 1,
               border: "1px dashed",
               borderColor: "#e1e3e5",
               borderRadius: "8px",
-              textAlign: "center",
               bgcolor: "#ffffff",
             }}
           >
-            <Typography variant="h5" gutterBottom>
-              {formData.section_title}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Layout:{" "}
-              {formData.display_layout === "grid" ? "2-Column Grid" : "Slider"}
-              {formData.display_layout === "slider" &&
-                ` | Effect: ${
-                  formData.slider_effect === "standard"
-                    ? "Standard Slide"
-                    : formData.slider_effect === "fade"
-                      ? "Fade Transition"
-                      : "Carousel"
-                }`}
-            </Typography>
+            <SettingsPreview
+              layout={formData.display_layout}
+              effect={formData.slider_effect}
+              sectionTitle={formData.section_title}
+            />
           </Box>
         </CardContent>
       </Card>

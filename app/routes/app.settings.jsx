@@ -8,8 +8,6 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import SaveIcon from "@mui/icons-material/Save";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { authenticate } from "../shopify.server";
 import { useTestimonialData } from "../hooks/useTestimonialData";
 import { useTestimonialSubmit } from "../hooks/useTestimonialSubmit";
@@ -20,10 +18,12 @@ import {
   deleteSettings,
 } from "../api/settings";
 import { Notification } from "../components/common/Notification";
-import ConfirmationDialog from "../components/confirmation-dialog";
 import { useCurrentShopDomain } from "../utils/helper";
+import ConfirmationDialog from "../components/confirmation-dialog";
 import SettingsForm from "../pages/settings/SettingsForm";
 import SettingsShimmer from "../pages/settings/SettingsShimmer";
+import SaveIcon from "@mui/icons-material/Save";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export const loader = async ({ request }) => {
   await authenticate.admin(request);
