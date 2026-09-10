@@ -1,0 +1,23 @@
+{% if block.settings.enabled %}
+  <script>
+    (function() {
+      document.body.setAttribute('data-video-testimonial-enabled', 'true');
+      window.__videoTestimonialAppEnabled = true;
+    })();
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Video Testimonial App",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable Video Testimonial App",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

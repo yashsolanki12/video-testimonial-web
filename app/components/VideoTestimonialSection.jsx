@@ -1,14 +1,11 @@
-import { useState, useEffect } from "react";
+import React from "react";
 import { Box, Typography, Card, IconButton } from "@mui/material";
+import { extractVideoEmbedUrl } from "../utils/helper";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { extractVideoEmbedUrl } from "../utils/helper";
 
 const VideoCard = ({ testimonial }) => {
-  const embedUrl = extractVideoEmbedUrl(
-    testimonial.video_url,
-    testimonial.video_type,
-  );
+  const embedUrl = extractVideoEmbedUrl(testimonial.video_url);
 
   return (
     <Card
@@ -74,7 +71,7 @@ const GridView = ({ testimonials }) => {
 };
 
 const SliderView = ({ testimonials, effect }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = React.useState(0);
 
   const handlePrev = () => {
     setCurrentIndex((prev) =>
@@ -88,7 +85,7 @@ const SliderView = ({ testimonials, effect }) => {
     );
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (effect === "carousel" && testimonials.length > 1) {
       const interval = setInterval(() => {
         setCurrentIndex((prev) =>
@@ -196,8 +193,7 @@ const SliderView = ({ testimonials, effect }) => {
                 width: 10,
                 height: 10,
                 borderRadius: "50%",
-                bgcolor:
-                  index === currentIndex ? "primary.main" : "grey.300",
+                bgcolor: index === currentIndex ? "primary.main" : "grey.300",
                 cursor: "pointer",
                 transition: "bgcolor 0.3s",
               }}
@@ -237,10 +233,7 @@ const VideoTestimonialSection = ({ testimonials, settings }) => {
       {displayLayout === "grid" ? (
         <GridView testimonials={testimonials} />
       ) : (
-        <SliderView
-          testimonials={testimonials}
-          effect={sliderEffect}
-        />
+        <SliderView testimonials={testimonials} effect={sliderEffect} />
       )}
     </Box>
   );
